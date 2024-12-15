@@ -51,4 +51,4 @@ def login():
 
 @app.route('/home', methods=['GET', 'POST'])
 def home():
-    return "Opa!"
+    return "Opa! Testando!"
