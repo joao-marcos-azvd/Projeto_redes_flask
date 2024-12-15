@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 def obter_conexao():
     # Conectando o banco
-    conn = sqlite3.connect('Redes/projetos_flask/database.db') # Editar esse caminho, porque ele é referente a meu repositório
+    conn = sqlite3.connect('database.db') 
     # Configuração pra pegar os dados do banco na forma de dicionário
     conn.row_factory = sqlite3.Row
     # Retornando conexão
@@ -15,4 +15,4 @@ def obter_conexao():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('pages/index.html')
