@@ -25,7 +25,7 @@ def index():
 # Página de cadastro (Só funciona de o usuário não tiver no banco!)
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
-    if request.method == "POST":
+    if request.method == 'POST':
         nome = request.form['nome_user']
         email = request.form['email_user']
         hash_senha = generate_password_hash(request.form['senha_user']) 
@@ -36,11 +36,10 @@ def cadastro():
             if email == e_user[0]:
                 conecxao.close()
                 return redirect(url_for('index'))
-            else:
-                conecxao.execute("INSERT INTO usuarios(nome, email, hash_senha) VALUES(?, ?, ?)", (nome, email, hash_senha,))
-                conecxao.commit()
-                conecxao.close()
-                return redirect(url_for("home"))
+        conecxao.execute("INSERT INTO usuarios (nome, email, hash_senha) VALUES (?, ?, ?)", (nome, email, hash_senha))
+        conecxao.commit()
+        conecxao.close()
+        return redirect(url_for('home'))
     else:
         return render_template('pages/cadastro.html')
 
