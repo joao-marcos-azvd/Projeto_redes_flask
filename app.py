@@ -1,7 +1,7 @@
 # Importando coisas do Flask
 from flask import Flask, render_template, request, redirect, url_for
 # Importando flask_login pra validar usuários, fazer logout e proteger as rotas
-from flask_login import LoginManager, login_user, current_user, logout_user, login_required
+from flask_login import LoginManager, login_user, current_user, logout_user, login_required #Tenho que vê como eu mexo nisso!
 # Importando biblioteca de hash de senha
 from werkzeug.security import generate_password_hash, check_password_hash
 # Importando sqlite3
@@ -65,7 +65,7 @@ def login():
 # Página Home
 # Porteger essa rota!
 @app.route('/home', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def home():
     return render_template("home.html")
 
