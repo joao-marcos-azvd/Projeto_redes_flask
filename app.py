@@ -1,7 +1,7 @@
 # Importando coisas do Flask
 from flask import Flask, render_template, request, redirect, url_for
 # Importando flask_login pra validar usuários, fazer logout e proteger as rotas
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required #Tenho que vê como eu mexo nisso!
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user #Tenho que vê como eu mexo nisso!
 # Importando biblioteca de hash de senha
 from werkzeug.security import generate_password_hash, check_password_hash
 # Importando sqlite3
@@ -55,7 +55,7 @@ def cadastro():
         nome = request.form['nome_user']
         email = request.form['email_user']
         hash_senha = generate_password_hash(request.form['senha_user']) 
-        with obter_conecxao() as conecxao:  # Usando 'with' para garantir que a conexão seja fechada
+        with obter_conecxao() as conecxao: 
             users = conecxao.execute('SELECT email FROM usuarios').fetchall()
             # Verifica se o usuário não está cadastrado
             for e_user in users:
@@ -66,6 +66,11 @@ def cadastro():
                     """
             conecxao.execute("INSERT INTO usuarios (nome, email, hash_senha) VALUES (?, ?, ?)", (nome, email, hash_senha))
             conecxao.commit()
+        conecxao = obter_conecxao()
+        user = conecxao.execute('SELECT id FROM usuarios WHERE email = ?', (email,)).fetchone()
+        user_obj = User(id=user[0], nome=nome, email=email)
+        conecxao.close()
+        login_user(user_obj)  # Usando login_user para criar a sessão
         return redirect(url_for('home'))
     else:
         return render_template('pages/cadastro.html')
@@ -99,7 +104,8 @@ def login():
 @app.route('/home')
 @login_required
 def home():
-    return render_template("pages/home.html")
+    nome_usuario = current_user.nome
+    return render_template("pages/home.html", nome = nome_usuario) #, nome = User['nome'])
 
 @app.route('/prestou')
 @login_required
