@@ -1,5 +1,7 @@
 # Importando coisas do Flask
 from flask import Flask, render_template, request, redirect, url_for
+# Importando flask_login pra validar usuários, fazer logout e proteger as rotas
+from flask_login import LoginManager, login_user, current_user, logout_user, login_required
 # Importando biblioteca de hash de senha
 from werkzeug.security import generate_password_hash, check_password_hash
 # Importando sqlite3
@@ -35,7 +37,7 @@ def cadastro():
         for e_user in users:
             if email == e_user[0]:
                 conecxao.close()
-                return redirect(url_for('index'))
+                return "Usuário já cadastrado!"
         conecxao.execute("INSERT INTO usuarios (nome, email, hash_senha) VALUES (?, ?, ?)", (nome, email, hash_senha))
         conecxao.commit()
         conecxao.close()
@@ -52,12 +54,25 @@ def login():
         conecxao = obter_conecxao()
         user = conecxao.execute('SELECT hash_senha FROM usuarios WHERE email = ?', (email,)).fetchone()
         if user and check_password_hash(user[0], senha):
+            conecxao.close()
             return redirect(url_for('home'))
         else:
-            return "Email ou senha incorretos"
+            conecxao.close()
+            return "Email ou senha incorretos!"
     else:
         return render_template('pages/login.html')
 
+# Página Home
+# Porteger essa rota!
 @app.route('/home', methods=['GET', 'POST'])
+@login_required
 def home():
-    return "Opa! Testando!"
+    return render_template("home.html")
+
+# Fazer logout!
+@app.route('/logout')
+def logout():
+    # Acho que isso já faz logout, mas primeiro temos que criar a sessão do usuário!
+    # logout_user() 
+    # return render_template('index.html')
+    pass

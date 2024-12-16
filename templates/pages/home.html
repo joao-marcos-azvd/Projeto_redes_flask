@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+
+{% block navbar %}
+    <h2><a href="{{ url_for('index') }}">Home</a></h2>
+    <h2><a href="{{ url_for('cadastro') }}">Cadastro</a></h2>
+{% endblock %}
+
+{% block conteudo %}
+    <h1>Bem vindo, {{nome_user}}</h1>
+{% endblock %}
+
+
