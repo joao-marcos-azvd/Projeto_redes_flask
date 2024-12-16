@@ -1,7 +1,7 @@
 # Importando coisas do Flask
 from flask import Flask, render_template, request, redirect, url_for
 # Importando flask_login pra validar usuários, fazer logout e proteger as rotas
-from flask_login import LoginManager, login_user, current_user, logout_user, login_required #Tenho que vê como eu mexo nisso!
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required #Tenho que vê como eu mexo nisso!
 # Importando biblioteca de hash de senha
 from werkzeug.security import generate_password_hash, check_password_hash
 # Importando sqlite3
@@ -11,6 +11,20 @@ app = Flask(__name__)
 # Definição de sesão no Flask
 app.config['SECRET_KEY'] = 'S_U_P_E_R_S_E_C_R_E_T_O_1_2_3'
 
+# Configurações do flask-login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'  # Nome da rota para a página de login
+
+# Classe do usuário
+class User(UserMixin):
+    def __init__(self, id_user, nome_user, email_user, hash_user):
+        self.id = id_user
+        self.nome = nome_user
+        self.email = email_user
+        self.hash = hash_user
+
+# Conexão com o banco
 def obter_conecxao():
     # Conectando o banco
     conn = sqlite3.connect('database.db') 
@@ -18,6 +32,16 @@ def obter_conecxao():
     conn.row_factory = sqlite3.Row
     # Retornando conexão
     return conn
+
+# Validação de usuários
+@login_manager.user_loader
+def load_user(user_id):
+    db = obter_conecxao()
+    user = db.execute("SELECT id, nome FROM usuarios WHERE id = ?", (user_id,)).fetchone()
+    if user:
+        # Retorna o ID e nome da pessoa
+        return User(id=user[0], nome=user[1])
+    return None
 
 # Página inicial
 @app.route('/')
@@ -37,7 +61,10 @@ def cadastro():
         for e_user in users:
             if email == e_user[0]:
                 conecxao.close()
-                return "Usuário já cadastrado!"
+                return """
+                <p>Uusário já cadstrado!</p>
+                <p><a href="/">Click aqui para voltar!</a></p>
+                """
         conecxao.execute("INSERT INTO usuarios (nome, email, hash_senha) VALUES (?, ?, ?)", (nome, email, hash_senha))
         conecxao.commit()
         conecxao.close()
@@ -70,6 +97,7 @@ def home():
     return render_template("home.html")
 
 # Fazer logout!
+# Proteger essa rota
 @app.route('/logout')
 def logout():
     # Acho que isso já faz logout, mas primeiro temos que criar a sessão do usuário!
