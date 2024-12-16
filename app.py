@@ -18,11 +18,10 @@ login_manager.login_view = 'login'  # Nome da rota para a página de login
 
 # Classe do usuário
 class User(UserMixin):
-    def __init__(self, id_user, nome_user, email_user, hash_user):
-        self.id = id_user
-        self.nome = nome_user
-        self.email = email_user
-        self.hash = hash_user
+    def __init__(self, id, nome, email):
+        self.id = id
+        self.nome = nome
+        self.email = email
 
 # Conexão com o banco
 def obter_conecxao():
@@ -36,11 +35,11 @@ def obter_conecxao():
 # Validação de usuários
 @login_manager.user_loader
 def load_user(user_id):
-    db = obter_conecxao()
-    user = db.execute("SELECT id, nome FROM usuarios WHERE id = ?", (user_id,)).fetchone()
+    conecxao = obter_conecxao()
+    user = conecxao.execute("SELECT id, nome, email FROM usuarios WHERE id = ?", (user_id,)).fetchone()
+    conecxao.close()
     if user:
-        # Retorna o ID e nome da pessoa
-        return User(id=user[0], nome=user[1])
+        return User(id=user[0], nome=user[1], email=user[2])  # Retorna o usuário com os dados do banco
     return None
 
 # Página inicial
@@ -49,58 +48,67 @@ def index():
     return render_template('pages/index.html')
 
 # Página de cadastro (Só funciona de o usuário não tiver no banco!)
+# Tem que adicionar login_manager aqui
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
     if request.method == 'POST':
         nome = request.form['nome_user']
         email = request.form['email_user']
         hash_senha = generate_password_hash(request.form['senha_user']) 
-        conecxao = obter_conecxao()
-        users = conecxao.execute('SELECT email FROM usuarios').fetchall()
-        # Verifica se o usuário não está cadastrado!
-        for e_user in users:
-            if email == e_user[0]:
-                conecxao.close()
-                return """
-                <p>Uusário já cadstrado!</p>
-                <p><a href="/">Click aqui para voltar!</a></p>
-                """
-        conecxao.execute("INSERT INTO usuarios (nome, email, hash_senha) VALUES (?, ?, ?)", (nome, email, hash_senha))
-        conecxao.commit()
-        conecxao.close()
+        with obter_conecxao() as conecxao:  # Usando 'with' para garantir que a conexão seja fechada
+            users = conecxao.execute('SELECT email FROM usuarios').fetchall()
+            # Verifica se o usuário não está cadastrado
+            for e_user in users:
+                if email == e_user[0]:
+                    return """
+                    <p>Usuário já cadastrado!</p>
+                    <p><a href="/">Clique aqui para voltar!</a></p>
+                    """
+            conecxao.execute("INSERT INTO usuarios (nome, email, hash_senha) VALUES (?, ?, ?)", (nome, email, hash_senha))
+            conecxao.commit()
         return redirect(url_for('home'))
     else:
         return render_template('pages/cadastro.html')
 
 # Página de login (Só vai funcionar se o usuário tiver cadastrado!)
+# Colocando o flask-login aqui!
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form['email_user']
         senha = request.form['senha_user']
         conecxao = obter_conecxao()
-        user = conecxao.execute('SELECT hash_senha FROM usuarios WHERE email = ?', (email,)).fetchone()
-        if user and check_password_hash(user[0], senha):
+        user = conecxao.execute('SELECT * FROM usuarios WHERE email = ?', (email,)).fetchone()
+
+        if user and check_password_hash(user[3], senha):  # Verificando senha
             conecxao.close()
+            user_obj = User(id=user[0], nome=user[1], email=user[2])
+            login_user(user_obj)  # Usando login_user para criar a sessão
             return redirect(url_for('home'))
         else:
             conecxao.close()
-            return "Email ou senha incorretos!"
+            return """
+            <p>Email ou senha incorretos!</p>
+            <p><a href="/login">Click aqui para voltar!</a></p>
+            """
     else:
         return render_template('pages/login.html')
 
 # Página Home
 # Porteger essa rota!
-@app.route('/home', methods=['GET', 'POST'])
-# @login_required
+@app.route('/home')
+@login_required
 def home():
-    return render_template("home.html")
+    return render_template("pages/home.html")
+
+@app.route('/prestou')
+@login_required
+def prestou():
+    return render_template('pages/prestou.html')
 
 # Fazer logout!
 # Proteger essa rota
 @app.route('/logout')
 def logout():
-    # Acho que isso já faz logout, mas primeiro temos que criar a sessão do usuário!
-    # logout_user() 
-    # return render_template('index.html')
-    pass
+    logout_user()  # Desconecta o usuário
+    return redirect(url_for('index'))  # Redireciona para a página inicial após o logout

@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+
+{% block navbar %}
+    <h2><a href="{{ url_for('index') }}">Index</a></h2>
+    <h2><a href="{{ url_for('home') }}">Home</a></h2>
+    <h2><a href="{{url_for('prestou')}}">Prestou</a></h2>
+    <h2><a href="{{ url_for('logout') }}">Logout</a></h2>
+{% endblock %}
+
+{% block conteudo %}
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Cupiditate laudantium impedit itaque aliquid odit molestias nobis sequi dolore maxime voluptas voluptatibus, voluptatem excepturi quibusdam vitae earum beatae, amet voluptate expedita.
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatum, in. Distinctio accusantium reiciendis accusamus sed quo ducimus facilis excepturi totam mollitia velit optio, quaerat labore molestiae. Nobis quisquam atque iure?
+    </p>
+{% endblock %}
+
+
