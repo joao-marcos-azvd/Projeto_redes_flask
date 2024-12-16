@@ -1,26 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Layout</title>
-
     <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
-
+    <link rel="stylesheet" href="{{url_for('static', filename='cadastro.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='index.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='login.css')}}">
 </head>
 <body>
-    <!-- Template base -->
     <div class="container">
         <nav>
             {% block navbar %}
-                
+                <h2><a href="{{ url_for('index') }}">Home</a></h2>
+                <h2><a href="{{ url_for('cadastro') }}">Cadastrar-se</a></h2>
+                <h2><a href="{{ url_for('login') }}">Logar</a></h2>
             {% endblock %}
-        </nav> 
+        </nav>  
         <main>
             {% block conteudo %}
-                
             {% endblock %}
         </main>
+        <footer>
+            <p>Componentes: João Marcos/Ruan Allyson</p>
+        </footer>
     </div>
 </body>
 </html>

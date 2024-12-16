@@ -1,1 +1,14 @@
-<h1>Você está logado!</h1>
+{% extends 'layout.html' %}
+
+{% block navbar %}
+    <h2><a href="{{ url_for('index') }}">Home</a></h2>
+    <h2><a href="{{ url_for('login') }}">Login</a></h2>
+{% endblock %}
+
+{% block conteudo %}
+    <form action="{{ url_for('login') }}" method="post">
+        <input type="email" name="email_user" placeholder="E-mail">
+        <input type="password" name="senha_user" placeholder="Senha">
+        <input type="submit" placeholder="Cadastra-se">
+    </form>
+{% endblock %}

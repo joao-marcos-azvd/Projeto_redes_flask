@@ -46,7 +46,17 @@ def cadastro():
 # Página de login (Só vai funcionar se o usuário tiver cadastrado!)
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+    if request.method == 'POST':
+        email = request.form['email_user']
+        senha = request.form['senha_user']
+        conecxao = obter_conecxao()
+        user = conecxao.execute('SELECT hash_senha FROM usuarios WHERE email = ?', (email,)).fetchone()
+        if user and check_password_hash(user[0], senha):
+            return redirect(url_for('home'))
+        else:
+            return "Email ou senha incorretos"
+    else:
+        return render_template('pages/login.html')
 
 @app.route('/home', methods=['GET', 'POST'])
 def home():
