@@ -26,7 +26,7 @@ class User(UserMixin):
 # Conexão com o banco
 def obter_conecxao():
     # Conectando o banco
-    conn = sqlite3.connect('database.db') 
+    conn = sqlite3.connect('database/database.db') 
     # Configuração pra pegar os dados do banco na forma de dicionário
     conn.row_factory = sqlite3.Row
     # Retornando conexão
